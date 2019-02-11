@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Set to ideal viewport -->
+    <title>OUHK Chatbot</title>
+    <style type="text/css">
+        .conversation {
+            width: 570px;
+            height: 620px;
+            border: 3px solid #3a662a;
+            margin: 60px auto 0;
+            background: #f9f9f9;
+        }
+
+        .flow {
+            width: 540px;
+            height: 550px;
+            border: 2px solid #655f66;
+            background: #fff;
+            margin: 8px auto 0;
+            overflow: auto;
+        }
+
+        .input {
+            width: 700px;
+            margin: 12px auto 0;
+        }
+
+        .textfield {
+            width: 410px;
+            height: 24px;
+            padding: 1px;
+            float: left;
+            margin-left: 11px;
+            outline: none;
+            text-indent: 5px;
+        }
+
+        .buttons {
+            width: 56px;
+            height: 30px;
+            float: left;
+            margin-left: 10px;
+        }
+
+        .chatbot_dialogue {
+            margin: 8px;
+            text-align: right;
+        }
+
+        .chatbot_dialogue span {
+            display: inline-block;
+            background: #05497a;
+            border-radius: 12px;
+            color: #fffbfb;
+            padding: 6px 12px;
+        }
+
+        .student_dialogue {
+            margin: 8px;
+            text-align: left;
+        }
+
+        .student_dialogue span {
+            display: inline-block;
+            background: #00a13a;
+            border-radius: 12px;
+            color: #fffbfb;
+            padding: 6px 12px;
+        }
+    </style>
+    <script type="text/javascript">
+        window.onload = function () {
+            let speaker = 0;
+            let words = document.getElementById("flow_id");
+            let flow_id_in_the_field = document.getElementById("textfield_id");
+            let sendout = document.getElementById("sendbutton_id");
+            sendout.onclick = function () {
+                let string = "";
+                if (flow_id_in_the_field.value == "") {
+                    alert("Cannot be empty!");
+                    return;
+                }
+                if (speaker == 1) {
+                    <!-- Change it to 1 in order to let student talk -->
+                    string = '<div class="chatbot_dialogue"><span>Chatbot: ' + flow_id_in_the_field.value + '</span></div>';
+                }
+                else {
+                    string = '<div class="student_dialogue"><span>Student: ' + flow_id_in_the_field.value + '</span></div>';
+                }
+                words.innerHTML = words.innerHTML + string;
+            }
+
+        }
+    </script>
+</head>
+<body>
+<div class="conversation">
+    <div class="flow" id="flow_id">
+        <div class="chatbot_dialogue"><span>Chatbot: Hello!</span></div>
+        <div class="student_dialogue"><span>Student: Hi!</span></div>
+    </div>
+    <div class="input">
+        </select>
+        <input type="text" class="textfield" id="textfield_id">
+        <input type="button" value="send" class="buttons" id="sendbutton_id">
+        <input type="button" value="voice" class="buttons" id="voicebutton_id">
+    </div>
+</div>
+</body>
+</html>
