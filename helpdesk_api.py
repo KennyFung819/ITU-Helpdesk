@@ -8,20 +8,20 @@ Created on Wed Feb  6 12:38:11 2019
 from flask import Flask
 from flask import request
 from flask import make_response
+from flask import render_template
+from flask import redirect
+from flask import json
 from dotenv import load_dotenv
 from watson_developer_cloud import WatsonApiException
 from watson_developer_cloud import AssistantV2
 from watson_developer_cloud import LanguageTranslatorV3
 from watson_developer_cloud import SpeechToTextV1
-import urllib.request,json,os
+import urllib,os
 
-global assistant,session_id
-session_id = ''
+global watsonAssistant
 #init variable
 app = Flask(__name__)
-APP_ROOT = os.path.join(os.path.dirname(__file__), '..') 
-dotenv_path = os.path.join(APP_ROOT, '.env')
-load_dotenv(dotenv_path)
+load_dotenv('.env')
 ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
 ASSISTANT_URL = os.getenv("ASSISTANT_URL")
 ASSISTANT_VERSION = os.getenv("ASSISTANT_VERSION")
@@ -30,37 +30,48 @@ LANGUAGE_TRANSLATOR_APIKEY = os.getenv("LANGUAGE_TRANSLATOR_APIKEY")
 LANGUAGE_TRANSLATOR_URL = os.getenv("LANGUAGE_TRANSLATOR_URL")
 LANGUAGE_TRANSLATOR_VERSION = os.getenv("LANGUAGE_TRANSLATOR_VERSION")
 
-
-
-@app.route('/')
-def index():
-    return 'Hello, World!' 
-
 @app.route('/createConnection')
 def createConnection():
     try:
-        global assistant
-        assistant=AssistantV2(
+        global watsonAssistant
+        watsonAssistant=AssistantV2(
             iam_apikey=ASSISTANT_APIKEY,
             version=ASSISTANT_VERSION,
             url=ASSISTANT_URL
         )
         print("Connected")
-
+        return watsonAssistant
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
+        return "Service Unavalible (Connection)"
+
+@app.route('/',methods=['GET'])
+def home():
+    resp = redirect('/index')
+    return resp
+
+@app.route('/index',methods=['GET'])
+def index():
+    global watsonAssistant
+    resp = make_response(render_template("chatbot.html"))
+    if not 'session_id' in request.cookies:
+        session_id = createSession(watsonAssistant)
+        resp.set_cookie('session_id', session_id)
+    return resp 
 
 @app.route('/createSession')
-def createSession():
+def createSession(watsonAssistant):
     try:
-        global assistant,session_id
-        response = assistant.create_session(
+        response = watsonAssistant.create_session(
             assistant_id=ASSISTANT_ID
         ).get_result()
         session_id = response['session_id']
         print("Created Session:"+session_id)
+        return session_id
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
+        return "Service Unavalible (Session)"
+
 
 @app.route('/translate',methods=['GET','POST'])
 def translate():
@@ -88,7 +99,7 @@ def translate():
 
 @app.route('/cantoneseTranslate',methods=['GET','POST'])
 def cantoneseTranslate():
-    if request_method == 'POST':
+    if request.method == 'POST':
         return ("Doing")
 
 @app.route('/voiceToText',methods=['POST'])
@@ -98,36 +109,44 @@ def voiceTotext():
 @app.route('/input',methods=['GET','POST'])
 def userInput():
     try:
+        global watsonAssistant
         if request.method == 'POST':
-            input_text = request.form['user_input']
-            global assistant,session_id
-            response = assistant.message(
+            if not 'session_id' in request.cookies:
+                session_id = createSession(watsonAssistant)
+            else:
+                session_id = request.cookies['session_id']
+            input_data = request.get_json()
+            print(input_data)
+            input_text = input_data['user_input']
+            print(input_text)            
+            response = watsonAssistant.message(
                 assistant_id=ASSISTANT_ID,
                 session_id= session_id,
                 input={
                     'message_type': 'text',
-                    'text': input_text
+                    'text': "'"+input_text+"'"
                 }
             ).get_result()
             print(json.dumps(response, indent=2))
             response_lists = response['output']['generic']
-            for oneList in response_lists:
-                output_text = oneList["text"] 
-            return output_text
+ #           for oneList in response_lists:
+ #               output_text = oneList["text"] 
+            resp = json.jsonify(response_lists)
+            print(json.jsonify(response_lists))
+            resp.set_cookie('session_id', session_id)
+            return resp
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
+        return "Service Unavalible (Connection)"
         
-                
+
+
 if __name__== '__main__':
     try:
-        createConnection()
-        #resp = make_response(render_template(...))
-        #resp.set_cookie('session_id', session_id)
-        if not 'session_id' in request.cookies:
-            createSession()
+        watsonAssistant = createConnection()
         app.run(
             host = '127.0.0.1',
-            port = 3001,
+            port = 80,
             debug = True
         )
     except Exception as e:
