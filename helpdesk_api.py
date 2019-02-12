@@ -117,19 +117,28 @@ def userInput():
             input_data = request.get_json()
             print(input_data)
             input_text = input_data['user_input']
-            print(input_text)            
-            response = watsonAssistant.message(
-                assistant_id=ASSISTANT_ID,
-                session_id= session['session_id'],
-                input={
-                    'message_type': 'text',
-                    'text': "'"+input_text+"'"
-                }
-            ).get_result()
+            print(input_text)
+            #initalize-welcome
+            if (input_text=='initalize-welcome'):
+                response = watsonAssistant.message(
+                    assistant_id=ASSISTANT_ID,
+                    session_id= session['session_id'],
+                    input={}
+                ).get_result()
+            #Normal input
+            else:
+                response = watsonAssistant.message(
+                    assistant_id=ASSISTANT_ID,
+                    session_id= session['session_id'],
+                    input={
+                        'message_type': 'text',
+                        'text': "'"+input_text+"'"
+                    }
+                ).get_result()
             print(json.dumps(response, indent=2))
             response_lists = response['output']['generic']
- #           for oneList in response_lists:
- #               output_text = oneList["text"] 
+#           for oneList in response_lists:
+#               output_text = oneList["text"] 
             resp = json.jsonify(response_lists)
             print(json.jsonify(response_lists))
             return resp
