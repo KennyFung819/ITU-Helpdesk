@@ -34,7 +34,17 @@
                     success: function(results)
                     {
                         results.forEach(result => {
-                            $string = '<div class="chatbot_dialogue"><span>chatbot: ' + result['text'] + '</span></div>';     
+                            switch (result['response_type']){
+                                case "text":
+                                    $string = '<div class="chatbot_dialogue"><span>chatbot: ' + result['text'] + '</span></div>';  
+                                    break;
+                                case "image":
+                                    $string= '<div class="chatbot_dialogue"><span>chatbot: <img src="'+result['source']+'"></span></div>';
+                                    break;
+                                default:
+                                    $string = '<div class="chatbot_dialogue"><span>chatbot: Hello </span></div>';  
+                                    break;
+                            }
                             $('#flow_id').append($string);
                         });
                     },
