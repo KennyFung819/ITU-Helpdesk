@@ -5,22 +5,16 @@ Created on Wed Feb  6 12:38:11 2019
 @author: Kenny
 """
 #Import all the lib
-from flask import Flask
-from flask import request
-from flask import make_response
-from flask import render_template
-from flask import redirect
-from flask import json
+from flask import Flask,request,make_response,render_template,redirect,json,session
 from dotenv import load_dotenv
-from watson_developer_cloud import WatsonApiException
-from watson_developer_cloud import AssistantV2
-from watson_developer_cloud import LanguageTranslatorV3
-from watson_developer_cloud import SpeechToTextV1
+from datetime import timedelta
+from watson_developer_cloud import WatsonApiException, AssistantV2,LanguageTranslatorV3, SpeechToTextV1
 import urllib,os
 
 global watsonAssistant
 #init variable
 app = Flask(__name__)
+app.secret_key = 'ITU-helpdesk'
 load_dotenv('.env')
 ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
 ASSISTANT_URL = os.getenv("ASSISTANT_URL")
@@ -29,6 +23,12 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 LANGUAGE_TRANSLATOR_APIKEY = os.getenv("LANGUAGE_TRANSLATOR_APIKEY")
 LANGUAGE_TRANSLATOR_URL = os.getenv("LANGUAGE_TRANSLATOR_URL")
 LANGUAGE_TRANSLATOR_VERSION = os.getenv("LANGUAGE_TRANSLATOR_VERSION")
+
+#This should set the session timeout limited to 5mins, which is same with IBM assistant
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=5)
 
 @app.route('/createConnection')
 def createConnection():
@@ -54,9 +54,8 @@ def home():
 def index():
     global watsonAssistant
     resp = make_response(render_template("chatbot.html"))
-    if not 'session_id' in request.cookies:
-        session_id = createSession(watsonAssistant)
-        resp.set_cookie('session_id', session_id)
+    if not 'session_id' in session:
+        session['session_id'] = createSession(watsonAssistant)
     return resp 
 
 @app.route('/createSession')
@@ -112,16 +111,16 @@ def userInput():
         global watsonAssistant
         if request.method == 'POST':
             if not 'session_id' in request.cookies:
-                session_id = createSession(watsonAssistant)
+                session['session_id'] = createSession(watsonAssistant)
             else:
-                session_id = request.cookies['session_id']
+                session['session_id'] = request.cookies['session_id']
             input_data = request.get_json()
             print(input_data)
             input_text = input_data['user_input']
             print(input_text)            
             response = watsonAssistant.message(
                 assistant_id=ASSISTANT_ID,
-                session_id= session_id,
+                session_id= session['session_id'],
                 input={
                     'message_type': 'text',
                     'text': "'"+input_text+"'"
@@ -133,7 +132,6 @@ def userInput():
  #               output_text = oneList["text"] 
             resp = json.jsonify(response_lists)
             print(json.jsonify(response_lists))
-            resp.set_cookie('session_id', session_id)
             return resp
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
