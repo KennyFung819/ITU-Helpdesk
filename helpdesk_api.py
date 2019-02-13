@@ -10,19 +10,21 @@ from dotenv import load_dotenv
 from datetime import timedelta
 from watson_developer_cloud import WatsonApiException, AssistantV2,LanguageTranslatorV3, SpeechToTextV1
 import urllib,os
-
 global watsonAssistant
 #init variable
 app = Flask(__name__)
 app.secret_key = 'ITU-helpdesk'
-load_dotenv('.env')
-ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
-ASSISTANT_URL = os.getenv("ASSISTANT_URL")
-ASSISTANT_VERSION = os.getenv("ASSISTANT_VERSION")
-ASSISTANT_ID = os.getenv("ASSISTANT_ID")
-LANGUAGE_TRANSLATOR_APIKEY = os.getenv("LANGUAGE_TRANSLATOR_APIKEY")
-LANGUAGE_TRANSLATOR_URL = os.getenv("LANGUAGE_TRANSLATOR_URL")
-LANGUAGE_TRANSLATOR_VERSION = os.getenv("LANGUAGE_TRANSLATOR_VERSION")
+try:
+    load_dotenv('.env')
+    ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
+    ASSISTANT_URL = os.getenv("ASSISTANT_URL")
+    ASSISTANT_VERSION = os.getenv("ASSISTANT_VERSION")
+    ASSISTANT_ID = os.getenv("ASSISTANT_ID")
+    LANGUAGE_TRANSLATOR_APIKEY = os.getenv("LANGUAGE_TRANSLATOR_APIKEY")
+    LANGUAGE_TRANSLATOR_URL = os.getenv("LANGUAGE_TRANSLATOR_URL")
+    LANGUAGE_TRANSLATOR_VERSION = os.getenv("LANGUAGE_TRANSLATOR_VERSION")
+except FileNotFoundError as e:
+    print("File '.env' doesn't exist")
 
 #This should set the session timeout limited to 5mins, which is same with IBM assistant
 @app.before_request
@@ -54,7 +56,7 @@ def home():
 def index():
     global watsonAssistant
     resp = make_response(render_template("chatbot.html"))
-    if not 'session_id' in session:
+    if not('session_id' in session):
         session['session_id'] = createSession(watsonAssistant)
     return resp 
 
@@ -76,7 +78,8 @@ def createSession(watsonAssistant):
 def translate():
     if request.method == 'POST':
         try:
-            beforeTranslateText = request.form['translateText']
+            beforeTranslateText = request.get_data()
+
             helpdesk_translator = LanguageTranslatorV3(
                 iam_apikey= LANGUAGE_TRANSLATOR_APIKEY,
                 url= LANGUAGE_TRANSLATOR_URL,
@@ -110,10 +113,10 @@ def userInput():
     try:
         global watsonAssistant
         if request.method == 'POST':
-            if not 'session_id' in request.cookies:
+            if not('session_id' in session):
                 session['session_id'] = createSession(watsonAssistant)
             else:
-                session['session_id'] = request.cookies['session_id']
+                session['session_id'] = session['session_id']
             input_data = request.get_json()
             print(input_data)
             input_text = input_data['user_input']
