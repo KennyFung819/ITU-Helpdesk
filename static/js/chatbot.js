@@ -10,7 +10,7 @@
                 success: function(results)
                 {
                     results.forEach(result => {
-                            $string = '<div class="chatbot_dialogue"><span>chatbot: ' + result['text'] + '</span></div>';
+                            $string = '<div class="chatbot_dialogue"><span>Helpdesk: ' + result['text'] + '</span></div>';
                         $('#flow_id').append($string);
                     });
                 }
@@ -47,7 +47,7 @@
                     return;
                 }
                 else {
-                    $string = '<div class="student_dialogue"><span>Student: ' + $input_text + '</span></div>';
+                    $string = '<div class="student_dialogue"><span> You: ' + $input_text + '</span></div>';
                     $('#flow_id').append($string);
                     if (typeof($input_text)=="string"){
                         $input_text = '"'+$input_text+'"'
@@ -65,31 +65,33 @@
                             switch (result['response_type']){
                                 case "text":
                                     if ($current_lang == 'en'){
-                                        $string = '<div class="chatbot_dialogue"><span>chatbot: ' + result['text'] + '</span></div>';  
+                                        $string = '<div class="chatbot_dialogue"><span>Helpdesk: ' + result['text'] + '</span></div>';  
                                         $('#flow_id').append($string);
                                     }
                                     else{
-                                        console.log(result['text'])                             
+                                        console.log(result['text']);
+                                        trim_string = result['text'].replace(/(\r\n|\n|\r)/gm, ""); 
+                                        console.log(trim_string);                
                                         $.ajax({ 
                                             url: '/translate',
-                                            data: '{"model_id":"'+$current_lang+'","text":"'+$.trim(result['text'])+'"}',
+                                            data: '{"model_id":"'+$current_lang+'","text":"'+trim_string+'"}',
                                             type: 'POST',
                                             contentType: 'application/json',
                                             dataType: 'text',
                                             success: function(translateResult)
                                             {
-                                                $string = '<div class="chatbot_dialogue"><span>chatbot: ' + translateResult + '</span></div>';
+                                                $string = '<div class="chatbot_dialogue"><span>Helpdesk: ' + translateResult + '</span></div>';
                                                 $('#flow_id').append($string);                                          
                                             }
                                         });
                                     }
                                     break;
                                 case "image":
-                                    $string= '<div class="chatbot_dialogue"><span>chatbot: <img src="'+result['source']+'"></span></div>';
+                                    $string= '<div class="chatbot_dialogue"><span>Helpdesk: <img src="'+result['source']+'"></span></div>';
                                     $('#flow_id').append($string);
                                     break;
                                 default:
-                                    $string = '<div class="chatbot_dialogue"><span>chatbot: Hello </span></div>'; 
+                                    $string = '<div class="chatbot_dialogue"><span>Helpdesk: Hello </span></div>'; 
                                     $('#flow_id').append($string); 
                                     break;
                             }

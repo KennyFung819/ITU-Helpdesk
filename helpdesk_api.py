@@ -78,7 +78,7 @@ def create_session(watson_assistant):
         return session_id
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
-        return "Service unavailable (Session)"
+        return "Service unavaiable (Session)"
 
 
 @app.route('/translate', methods=['GET', 'POST'])
@@ -141,11 +141,17 @@ def user_input():
             print(input_text)
             # Initalize welcome
             if input_text == 'initalize-welcome':
-                response = watsonAssistant.message(
-                    assistant_id=ASSISTANT_ID,
-                    session_id=session['session_id'],
-                    input={}
-                ).get_result()
+                if not ('Greeting' in session):
+                    response = watsonAssistant.message(
+                        assistant_id=ASSISTANT_ID,
+                        session_id=session['session_id'],
+                        input={}
+                    ).get_result()
+                    session['Greeting']= True
+                else:
+                    welcome_back = [{'response_type': 'text', 'text': 'Welcome Back.'}]
+                    resp = json.jsonify(welcome_back)
+                    return resp
             # Normal input
             else:
                 response = watsonAssistant.message(
@@ -158,7 +164,7 @@ def user_input():
                 ).get_result()
             print(json.dumps(response, indent=2))
             response_lists = response['output']['generic']
-            print(json.jsonify(response_lists))
+            print(response_lists)
             resp = json.jsonify(response_lists)
             return resp
     except WatsonApiException as ex:
