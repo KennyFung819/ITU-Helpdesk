@@ -43,7 +43,7 @@ def create_connection():
             version=ASSISTANT_VERSION,
             url=ASSISTANT_URL
         )
-        print("Connected")
+        print("Connected To IBM server")
         return watsonAssistant
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
@@ -61,6 +61,7 @@ def index():
     global watsonAssistant
     resp = make_response(render_template("chatbot.html"))
     if not('session_id' in session):
+        print("Session Request by index")        
         session['session_id'] = create_session(watsonAssistant)
     return resp
 
@@ -72,6 +73,7 @@ def create_session(watson_assistant):
             assistant_id=ASSISTANT_ID
         ).get_result()
         session_id = response['session_id']
+        print("Generating Session...")
         print("Created Session:"+session_id)
         return session_id
     except WatsonApiException as ex:
@@ -82,22 +84,27 @@ def create_session(watson_assistant):
 @app.route('/translate', methods=['GET', 'POST'])
 def translate():
     if request.method == 'POST':
-        output_text = []
+        output_text = ''
         try:
-            before_translate_text = request.form['translateText']
+            before_translate_text = request.get_json()
+            print(before_translate_text)
+            target = before_translate_text['text']
+            model_id = before_translate_text['model_id']
+            print(target)
+            print(model_id)
             helpdesk_translator = LanguageTranslatorV3(
                 iam_apikey=LANGUAGE_TRANSLATOR_APIKEY,
                 url=LANGUAGE_TRANSLATOR_URL,
                 version=LANGUAGE_TRANSLATOR_VERSION
             )
+            print("Connected To Translator")
             translation = helpdesk_translator.translate(
-                text=before_translate_text,
-                model_id='en-us').get_result()
-            translate_lists = translation["translations"]
-            for translate_list in translate_lists:
-                output_text = translate_list["translation"]
-                print(output_text)
-            print(json.dumps(translation, indent=2, ensure_ascii=False))
+                text=target,
+                model_id=model_id ).get_result()
+            print(json.dumps(translation, indent=2, ensure_ascii=False))                
+            translate_lists = translation["translations"][0]
+            output_text = translate_lists["translation"]
+            print(output_text)
             return output_text
         except WatsonApiException as ex:
             print("Method failed with status code " + str(ex.code) + ": " + ex.message)
@@ -123,8 +130,11 @@ def user_input():
         if request.method == 'POST':
             if not('session_id' in session):
                 session['session_id'] = create_session(watsonAssistant)
+                print("Generating Session in /input")
             else:
                 session['session_id'] = session['session_id']
+                print('Session renew by user iput.')
+                print('ID:'+session['session_id'])
             input_data = request.get_json()
             print(input_data)
             input_text = input_data['user_input']
@@ -148,10 +158,8 @@ def user_input():
                 ).get_result()
             print(json.dumps(response, indent=2))
             response_lists = response['output']['generic']
-#           for oneList in response_lists:
-#               output_text = oneList["text"] 
-            resp = json.jsonify(response_lists)
             print(json.jsonify(response_lists))
+            resp = json.jsonify(response_lists)
             return resp
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
@@ -163,7 +171,7 @@ if __name__ == '__main__':
         watsonAssistant = create_connection()
         app.run(
             host='127.0.0.1',
-            port=80,
+            port=1234,
             debug=True
         )
     except Exception as e:

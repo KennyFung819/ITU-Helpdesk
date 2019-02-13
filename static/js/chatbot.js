@@ -1,4 +1,5 @@
         $(document).ready(function() {
+            var $current_lang = "en";
             //POST a blank data to server for initalize
             $.ajax({ 
                 url: '/input',
@@ -15,6 +16,28 @@
                 }
             });
             //Send POST request when onclick
+            $("#translatebutton_id").click(function(){
+                $lang_selected = $( "#translate_selection" ).val();
+                switch ($lang_selected){
+                    case "English":
+                        $current_lang = "en";
+                        break;
+                    case "Spanish":
+                        $current_lang = "en-es";
+                        break;
+                    case "Germany":
+                        $current_lang = "en-de";
+                        break;
+                    case "Japanese":
+                        $current_lang = "en-ja";
+                        break;
+                    case "Russian":
+                        $current_lang = "en-ru";
+                        break;
+                    case "Chinese":
+                        $current_lang = "en-zh"
+                }
+            })
             $("#sendbutton_id").click(function(){
                 var $string = "";
                 var $input_text = $("#textfield_id").val();
@@ -30,28 +53,46 @@
                         $input_text = '"'+$input_text+'"'
                     }
                 }
-                $.ajax
-                ({ 
+                $.ajax({ 
                     url: '/input',
                     data: '{"user_input":'+$input_text+'}',
                     type: 'POST',
                     contentType: 'application/json',
                     dataType: 'json',
-                    success: function(results)
+                    success: function(assistantResults)
                     {
-                        results.forEach(result => {
+                        assistantResults.forEach(result => {
                             switch (result['response_type']){
                                 case "text":
-                                    $string = '<div class="chatbot_dialogue"><span>chatbot: ' + result['text'] + '</span></div>';  
+                                    if ($current_lang == 'en'){
+                                        $string = '<div class="chatbot_dialogue"><span>chatbot: ' + result['text'] + '</span></div>';  
+                                        $('#flow_id').append($string);
+                                    }
+                                    else{
+                                        console.log(result['text'])                             
+                                        $.ajax({ 
+                                            url: '/translate',
+                                            data: '{"model_id":"'+$current_lang+'","text":"'+$.trim(result['text'])+'"}',
+                                            type: 'POST',
+                                            contentType: 'application/json',
+                                            dataType: 'text',
+                                            success: function(translateResult)
+                                            {
+                                                $string = '<div class="chatbot_dialogue"><span>chatbot: ' + translateResult + '</span></div>';
+                                                $('#flow_id').append($string);                                          
+                                            }
+                                        });
+                                    }
                                     break;
                                 case "image":
                                     $string= '<div class="chatbot_dialogue"><span>chatbot: <img src="'+result['source']+'"></span></div>';
+                                    $('#flow_id').append($string);
                                     break;
                                 default:
-                                    $string = '<div class="chatbot_dialogue"><span>chatbot: Hello </span></div>';  
+                                    $string = '<div class="chatbot_dialogue"><span>chatbot: Hello </span></div>'; 
+                                    $('#flow_id').append($string); 
                                     break;
                             }
-                            $('#flow_id').append($string);
                         });
                     },
                     error: function(){
