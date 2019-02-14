@@ -15,6 +15,9 @@ global watsonAssistant
 # Init variable
 app = Flask(__name__)
 app.secret_key = 'ITU-helpdesk'
+# This should set the session timeout limited to 5 mins, which is same with IBM assistant
+app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=5)
+
 try:
     load_dotenv('.env')
     ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
@@ -26,12 +29,6 @@ try:
     LANGUAGE_TRANSLATOR_VERSION = os.getenv("LANGUAGE_TRANSLATOR_VERSION")
 except RuntimeError as e:
     print("File '.env' doesn't exist")
-
-# This should set the session timeout limited to 5 mins, which is same with IBM assistant
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
 
 
 @app.route('/createConnection')
@@ -69,6 +66,7 @@ def index():
 @app.route('/createSession')
 def create_session(watson_assistant):
     try:
+        session.permanent = True
         response = watson_assistant.create_session(
             assistant_id=ASSISTANT_ID
         ).get_result()
