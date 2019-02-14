@@ -16,7 +16,7 @@ global watsonAssistant
 app = Flask(__name__)
 app.secret_key = 'ITU-helpdesk'
 # This should set the session timeout limited to 5 mins, which is same with IBM assistant
-app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=5)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 
 try:
     load_dotenv('.env')
@@ -82,7 +82,6 @@ def create_session(watson_assistant):
 @app.route('/translate', methods=['GET', 'POST'])
 def translate():
     if request.method == 'POST':
-        output_text = ''
         try:
             before_translate_text = request.get_json()
             print(before_translate_text)
@@ -98,7 +97,7 @@ def translate():
             print("Connected To Translator")
             translation = helpdesk_translator.translate(
                 text=target,
-                model_id=model_id ).get_result()
+                model_id=model_id).get_result()
             print(json.dumps(translation, indent=2, ensure_ascii=False))                
             translate_lists = translation["translations"][0]
             output_text = translate_lists["translation"]
@@ -145,7 +144,7 @@ def user_input():
                         session_id=session['session_id'],
                         input={}
                     ).get_result()
-                    session['Greeting']= True
+                    session['Greeting'] = True
                 else:
                     welcome_back = [{'response_type': 'text', 'text': 'Welcome Back.'}]
                     resp = json.jsonify(welcome_back)
