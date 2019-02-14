@@ -96,6 +96,9 @@
                                     $('#flow_id').append($string); 
                                     break;
                             }
+                            var $flow_id = $("#flow_id"); 
+                            console.log("height:"+$flow_id.height());
+                            $("#flow_id").scrollTop($flow_id.height())
                         });
                     },
                     error: function(){
