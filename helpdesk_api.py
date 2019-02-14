@@ -35,7 +35,6 @@ def make_session_permanent():
 @app.route('/createConnection')
 def createConnection():
     try:
-        global watsonAssistant
         watsonAssistant=AssistantV2(
             iam_apikey=ASSISTANT_APIKEY,
             version=ASSISTANT_VERSION,
@@ -54,9 +53,8 @@ def home():
 
 @app.route('/index',methods=['GET'])
 def index():
-    global watsonAssistant
     resp = make_response(render_template("chatbot.html"))
-    if not('session_id' in session):
+    if 'session_id' not in session:
         session['session_id'] = createSession(watsonAssistant)
     return resp 
 
@@ -111,7 +109,6 @@ def voiceTotext():
 @app.route('/input',methods=['GET','POST'])
 def userInput():
     try:
-        global watsonAssistant
         if request.method == 'POST':
             if not('session_id' in session):
                 session['session_id'] = createSession(watsonAssistant)
@@ -156,7 +153,7 @@ if __name__== '__main__':
         watsonAssistant = createConnection()
         app.run(
             host = '127.0.0.1',
-            port = 80,
+            port = 5000,
             debug = True
         )
     except Exception as e:

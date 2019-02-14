@@ -18,6 +18,7 @@
             $("#sendbutton_id").click(function(){
                 var $string = "";
                 var $input_text = $("#textfield_id").val();
+                document.getElementById('textfield_id').value = "";
                 console.log($input_text);
                 if ($input_text == "") {
                     alert("Cannot be empty!");
