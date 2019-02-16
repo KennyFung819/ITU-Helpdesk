@@ -16,7 +16,7 @@ global watsonAssistant
 app = Flask(__name__)
 app.secret_key = 'ITU-helpdesk'
 # This should set the session timeout limited to 5 mins, which is same with IBM assistant
-app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=5)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 
 try:
     load_dotenv('.env')
@@ -57,8 +57,8 @@ def home():
 def index():
     global watsonAssistant
     resp = make_response(render_template("chatbot.html"))
-    if not('session_id' in session):
-        print("Session Request by index")        
+    if not ('session_id' in session):
+        print("Session Request by index")
         session['session_id'] = create_session(watsonAssistant)
     return resp
 
@@ -72,17 +72,16 @@ def create_session(watson_assistant):
         ).get_result()
         session_id = response['session_id']
         print("Generating Session...")
-        print("Created Session:"+session_id)
+        print("Created Session:" + session_id)
         return session_id
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
-        return "Service unavaiable (Session)"
+        return "Service unavailable (Session)"
 
 
 @app.route('/translate', methods=['GET', 'POST'])
 def translate():
     if request.method == 'POST':
-        output_text = ''
         try:
             before_translate_text = request.get_json()
             print(before_translate_text)
@@ -98,8 +97,8 @@ def translate():
             print("Connected To Translator")
             translation = helpdesk_translator.translate(
                 text=target,
-                model_id=model_id ).get_result()
-            print(json.dumps(translation, indent=2, ensure_ascii=False))                
+                model_id=model_id).get_result()
+            print(json.dumps(translation, indent=2, ensure_ascii=False))
             translate_lists = translation["translations"][0]
             output_text = translate_lists["translation"]
             print(output_text)
@@ -126,13 +125,13 @@ def user_input():
     try:
         global watsonAssistant
         if request.method == 'POST':
-            if not('session_id' in session):
+            if not ('session_id' in session):
                 session['session_id'] = create_session(watsonAssistant)
                 print("Generating Session in /input")
             else:
                 session['session_id'] = session['session_id']
                 print('Session renew by user iput.')
-                print('ID:'+session['session_id'])
+                print('ID:' + session['session_id'])
             input_data = request.get_json()
             print(input_data)
             input_text = input_data['user_input']
@@ -145,7 +144,7 @@ def user_input():
                         session_id=session['session_id'],
                         input={}
                     ).get_result()
-                    session['Greeting']= True
+                    session['Greeting'] = True
                 else:
                     welcome_back = [{'response_type': 'text', 'text': 'Welcome Back.'}]
                     resp = json.jsonify(welcome_back)
@@ -157,7 +156,7 @@ def user_input():
                     session_id=session['session_id'],
                     input={
                         'message_type': 'text',
-                        'text': "'"+input_text+"'"
+                        'text': "'" + input_text + "'"
                     }
                 ).get_result()
             print(json.dumps(response, indent=2))
@@ -168,7 +167,7 @@ def user_input():
     except WatsonApiException as ex:
         print("Method failed with status code " + str(ex.code) + ": " + ex.message)
         return "Service unavailable (Connection)"
-        
+
 
 if __name__ == '__main__':
     try:
