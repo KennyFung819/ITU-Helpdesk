@@ -6,6 +6,8 @@
     <!-- Set to ideal viewport -->
     <title>OUHK Chatbot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/solid.css" integrity="sha384-r/k8YTFqmlOaqRkZuSiE9trsrDXkh07mRaoGBMoDcmA58OHILZPsk29i2BsFng1B" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/fontawesome.css" integrity="sha384-4aon80D8rXCGx9ayDt85LbyUHeMWd3UiBaWliBlJ53yzm9hqN21A+o1pqoyK04h+" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="/static/js/chatbot.js"></script>
 </head>
@@ -14,11 +16,20 @@
     <div class="flow" id="flow_id">
     </div>
     <div class="input">
-        </select>
         <input type="text" class="textfield" id="textfield_id">
         <input type="button" value="send" class="buttons" id="sendbutton_id">
         <input type="button" value="voice" class="buttons" id="voicebutton_id">
-        <input type="button" value="translate" class="buttons" id="translatebutton_id">
+        <select id="translate_selection">
+            <option value="English">English</option>
+            <option value="Spanish">Spanish</option>
+            <option value="Germany">Germany</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Russian">Russian</option>
+            <option value="Chinese">Chinese</option>
+        </select>
+        <button class="buttons" id="translatebutton_id" alt="translate button"><i class="fas fa-language fa-2x"></i></button>
+
+        <!--<input type="button" value="translate" class="buttons" id="translatebutton_id"> -->
     </div>
 </div>
 </body>
