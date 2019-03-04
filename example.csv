@@ -1,0 +1,5 @@
+type,intent_name,entity_name,Node_tag,Node_name,value,value,value
+intent,csv_intent,,,,csv,This is intent,
+entity,,csv_entity,,,sample,example,here we go
+Synonym,,csv_entity,,,csv_synonym,,
+Node,csv_intent,,csv_node,Node_title,,,
