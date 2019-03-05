@@ -98,21 +98,37 @@ def update_intent(intent,updated_dict):
     ).get_result()
     print(json.dumps(response, indent=2))
 
-#list all the existing entity
-def list_entity():
+#Initalize entities dict
+def list_entity(entities_index):
     response=assistantV1.list_entities(
         workspace_id=WORKSPACE_ID
     ).get_result()
-    print(json.dumps(response, indent=2))
+    for item in response['entities']:
+        #put intent name into dict
+        entities_index.update({item['entity']:{}})
+    #return the dict   
+    print('Initalize the entities_list') 
+    return entities_index
 
-#get the selected intent
-def get_entity(entity):
+#get the selected entity
+def get_entity(entity,entities_dict):
     response=assistantV1.get_entity(
         workspace_id=WORKSPACE_ID,
         entity=entity,
         export=True
     ).get_result()
     print(json.dumps(response, indent=2))
+    entities_dict.update({entity:response['values']})
+    """
+    "values": [
+    {
+      "type": "synonyms",
+      "value": "water",
+      "synonyms": []
+    }]
+    """
+    print("Updating entity",entity)
+    return entities_dict
 
 #create a new entity
 def create_entity(entity,values):
@@ -135,7 +151,6 @@ def update_entity():
         ]
     ).get_result()
     print(json.dumps(response, indent=2))
-
 
 #create a new synonym for entity
 def create_synonym():
@@ -196,7 +211,12 @@ def update_intent_sample():
 if __name__ == "__main__":
     try:
         create_connection()
-        update_intent_sample()
+        #update_intent_sample()
+        exist_entities_dict= {}
+        exist_entities_dict= list_entity(exist_entities_dict)
+        entity_name = 'beverage'
+        exist_entities_dict = get_entity(entity_name,exist_entities_dict)
+        print(exist_entities_dict)
         #create_entity()
         #update_intent('hello',[{'text':'good evening'}] )
         #update_entity()
