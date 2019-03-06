@@ -46,7 +46,7 @@ def csv_controller():
         
 
 
-#create connection to watson server
+#**create connection to watson server
 def create_connection():
     global assistantV1
     assistantV1=AssistantV1(
@@ -56,7 +56,7 @@ def create_connection():
     )
     print("Connected")
 
-#list all the existing intent
+#*list all the existing intent
 def list_intent(intent_index):
     response=assistantV1.list_intents(
         workspace_id=WORKSPACE_ID
@@ -67,6 +67,16 @@ def list_intent(intent_index):
     #return the dict   
     print('Initalize the intent_list') 
     return intent_index
+
+#*add text to intent
+def add_intent_text(intent,text):
+    print("Add the text:", text , "to intent:" , intent)    
+    response=assistantV1.create_example(
+        workspace_id=WORKSPACE_ID,
+        intent='hello',
+        text=text
+    ).get_result()
+    print(json.dumps(response, indent=2))
 
 #get the selected intent
 def get_intent(intent,intent_dict):
@@ -79,7 +89,7 @@ def get_intent(intent,intent_dict):
     print('Updated dict with ',intent)
     return intent_dict
 
-#create a new intent
+#*create a new intent
 def create_intent(intent,new_examples):
     response=assistantV1.create_intent(
         workspace_id=WORKSPACE_ID,
@@ -98,7 +108,7 @@ def update_intent(intent,updated_dict):
     ).get_result()
     print(json.dumps(response, indent=2))
 
-#Initalize entities dict
+#*Initalize entities dict
 def list_entity(entities_index):
     response=assistantV1.list_entities(
         workspace_id=WORKSPACE_ID
@@ -130,7 +140,7 @@ def get_entity(entity,entities_dict):
     print("Updating entity",entity)
     return entities_dict
 
-#create a new entity
+#*create a new entity
 def create_entity(entity,values):
     response=assistantV1.create_entity(
         workspace_id=WORKSPACE_ID,
@@ -138,6 +148,16 @@ def create_entity(entity,values):
         values=values
     ).get_result()
     print(json.dumps(response, indent=2))
+
+#*add value to entity
+def add_entity_value(entity,value):
+    print("Adding value:% into entity: %",value , entity)
+    response=assistantV1.create_value(
+        workspace_id=WORKSPACE_ID,
+        entity=entity,
+        value=value
+    ).get_result()
+    print(json.dumps(response, indent=2))   
 
 #update the whole entity list
 def update_entity():
@@ -152,7 +172,7 @@ def update_entity():
     ).get_result()
     print(json.dumps(response, indent=2))
 
-#create a new synonym for entity
+#*create a new synonym for entity
 def create_synonym():
     try:
         response=assistantV1.create_synonym(
@@ -166,7 +186,7 @@ def create_synonym():
     except WatsonApiException as ex:
         print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
 
-#create a new dialog node
+#*create a new dialog node
 def create_node():
     response=assistantV1.create_dialog_node(
         workspace_id=WORKSPACE_ID,
@@ -179,7 +199,7 @@ def create_node():
     ).get_result()
     print(json.dumps(response, indent=2))
 
-#update the selected dialog node
+#*update the selected dialog node
 def update_node():
     response=assistantV1.update_dialog_node(
         workspace_id='{workspace_id}',
@@ -190,6 +210,13 @@ def update_node():
     ).get_result()
     print(json.dumps(response, indent=2))
 
+#sample 2
+def update_intent_sample_2():
+    #variable
+    intent_name = 'General_About_You'
+    text = 'Easier Method!!!'
+    add_intent_text(intent_name,text)
+  
 #controller example for intent
 def update_intent_sample():
     #variable
@@ -211,12 +238,7 @@ def update_intent_sample():
 if __name__ == "__main__":
     try:
         create_connection()
-        #update_intent_sample()
-        exist_entities_dict= {}
-        exist_entities_dict= list_entity(exist_entities_dict)
-        entity_name = 'beverage'
-        exist_entities_dict = get_entity(entity_name,exist_entities_dict)
-        print(exist_entities_dict)
+        update_intent_sample_2()
         #create_entity()
         #update_intent('hello',[{'text':'good evening'}] )
         #update_entity()
