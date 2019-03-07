@@ -1,4 +1,4 @@
-type,intent_name,entity_name,entity_value,Node_title,Node_name,value
+type,intent_name,entity_name,entity_value,node_title,node_name,value
 intent,csv_intent,,,,,This is intent
 intent,csv_intent,,,,,csv
 entity,,csv_entity,,,,sample

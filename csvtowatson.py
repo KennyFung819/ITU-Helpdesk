@@ -3,9 +3,7 @@ import csv
 from watson_developer_cloud import AssistantV1,WatsonApiException
 from dotenv import load_dotenv
 import os
-
 global assistantV1
-
 
 try:
     load_dotenv('test.env')
@@ -68,7 +66,7 @@ def list_entity():
         workspace_id=WORKSPACE_ID
     ).get_result()
     for item in response['entities']:
-        entities_index.append(item)
+        entities_index.append(item['entity'])
     #return the dict   
     print('Initalize the entities_list') 
     return entities_index
@@ -78,13 +76,13 @@ def create_entity(entity,values):
     response=assistantV1.create_entity(
         workspace_id=WORKSPACE_ID,
         entity=entity,
-        values=values
+        values=[{'value':values}]
     ).get_result()
     print(json.dumps(response, indent=2))
 
 #*add value to entity
 def add_entity_value(entity,value):
-    print("Adding value:% into entity: %",value , entity)
+    print("Adding value:{0} into entity: {1}".format(value,entity))
     response=assistantV1.create_value(
         workspace_id=WORKSPACE_ID,
         entity=entity,
@@ -114,17 +112,16 @@ def create_node(condition,node_name,title,node_value):
         },
         title=title
     ).get_result()
-    print(json.dumps(response, indent=2))
+    print("Respone",json.dumps(response, indent=2))
 
 #Intent Controller
 def intent_controller(intent_name,text,intent_index):
     #variable
-    print("intent_index:",intent_index)
     if intent_name in intent_index:
-        print('if',intent_name,text)
+        print('Existing Intent:{0} ,insert Text: "{1}"'.format(intent_name,text))
         add_intent_text(intent_name,text)
     else:
-        print('else',intent_name,text)        
+        print('New Intent:{0} ,with Text: "{1}"'.format(intent_name,text))
         create_intent(intent_name,text)
         intent_index.append(intent_name)
     return intent_index
@@ -133,10 +130,12 @@ def intent_controller(intent_name,text,intent_index):
 def entity_controller(entity_name,value,entity_index):
     #variable
     if entity_name in entity_index:
+        print('Existing Entity:{0} ,insert value: "{1}"'.format(entity_index,value))
         add_entity_value(entity_name,value)
     else:
+        print('New Entity:{0} ,with value: "{1}"'.format(entity_index,value))        
         create_entity(entity_name,value)
-        entity_index.append(value)
+        entity_index.append(entity_name)
     return entity_index
     
 #import the example.csv and output as ???
@@ -150,20 +149,17 @@ def import_csv(file_path):
 
 #controller which function should be use
 def csv_controller():
-    payload, field_name = import_csv('example.csv')
+    payload, field_name = import_csv('node.csv')
     exist_intent_index = list_intent()
-    exist_entity_index= list_entity
-    print(field_name)
+    exist_entity_index= list_entity()
+    print("Header: ",field_name)
     for payload_dict in payload:
         try:
-            print(payload_dict)    
             types = payload_dict['type'].lower()
+            print('Types:',types)   
             if types == 'intent':
-                print('Types:',types)
                 intent_name = payload_dict['intent_name']
-                print(intent_name)
                 intent_value = payload_dict['value']
-                print(intent_value)
                 exist_intent_index = intent_controller(intent_name,intent_value,exist_intent_index)
             if types == 'entity':
                 entity_name = payload_dict['entity_name']
@@ -175,10 +171,12 @@ def csv_controller():
                 synoym_value = payload_dict['value']
                 create_synonym(entity_name,entity_value,synoym_value)
             if types == 'node':
+                print("Node function")
                 condition = payload_dict['intent_name']
                 node_name = payload_dict['node_name']
                 title = payload_dict['node_title']
                 node_value= payload_dict['value']
+                print("Condition: {0}; Entity: {1}; synonym: {2}; Value: {3}".format(condition,node_name,title,node_value))
                 create_node(condition,node_name,title,node_value)
         except WatsonApiException as ex:
             print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
@@ -186,6 +184,5 @@ if __name__ == "__main__":
     try:
         create_connection()
         csv_controller()
-        #exist_intent_index = list_intent([])
     except Exception as e:
         print(e)
