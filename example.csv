@@ -1,5 +1,8 @@
-type,intent_name,entity_name,Node_tag,Node_name,value,value,value
-intent,csv_intent,,,,csv,This is intent,
-entity,,csv_entity,,,sample,example,here we go
-Synonym,,csv_entity,,,csv_synonym,,
-Node,csv_intent,,csv_node,Node_title,,,
+type,intent_name,entity_name,entity_value,Node_title,Node_name,value
+intent,csv_intent,,,,,This is intent
+intent,csv_intent,,,,,csv
+entity,,csv_entity,,,,sample
+entity,,csv_entity,,,,example
+entity,,csv_entity,,,,here we go
+Synonym,,csv_entity,example,,,csv_synonym
+Node,csv_intent,,,csv_node,Node_title,csv_node_values

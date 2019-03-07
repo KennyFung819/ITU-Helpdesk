@@ -17,35 +17,6 @@ try:
 except RuntimeError as e:
     print("File '.env' doesn't exist")
 
-#import the example.csv and output as ???
-def import_csv():
-    with open('example.csv', newline='') as csvfile:
-        csvreader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
-        fields = csvreader.fieldnames
-        payload = [row for row in csvreader]
-    return payload, fields
-
-#controller which function should be use
-def csv_controller():
-    payload, field_name = import_csv()
-    print(field_name)
-    for payload_dict in payload:
-        print(payload_dict)
-        print(payload_dict['type'].lower())        
-        
-        #types = payload_dict['type'].lower()
-        # if types == 'intent':
-        #     intent_value = [{'text':payload_dict['intent_value']}] 
-        #     create_intent(payload_dict['intent_name'],intent_value)
-        # if types == 'entity':
-        #     create_entity()
-        # if types == 'synonym':
-        #     create_synonym()
-        # if types == 'node':
-        #     create_synonym()
-        
-
-
 #**create connection to watson server
 def create_connection():
     global assistantV1
@@ -57,13 +28,13 @@ def create_connection():
     print("Connected")
 
 #*list all the existing intent
-def list_intent(intent_index):
+def list_intent():
+    intent_index = []
     response=assistantV1.list_intents(
         workspace_id=WORKSPACE_ID
     ).get_result()
     for item in response['intents']:
-        #put intent name into dict
-        intent_index.update({item['intent']:{}})
+        intent_index.append(item['intent'])
     #return the dict   
     print('Initalize the intent_list') 
     return intent_index
@@ -73,72 +44,34 @@ def add_intent_text(intent,text):
     print("Add the text:", text , "to intent:" , intent)    
     response=assistantV1.create_example(
         workspace_id=WORKSPACE_ID,
-        intent='hello',
+        intent=intent,
         text=text
     ).get_result()
     print(json.dumps(response, indent=2))
 
-#get the selected intent
-def get_intent(intent,intent_dict):
-    response=assistantV1.get_intent(
-        workspace_id=WORKSPACE_ID,
-        intent=intent,
-        export=True
-    ).get_result()
-    intent_dict.update({intent:response['examples']})
-    print('Updated dict with ',intent)
-    return intent_dict
-
 #*create a new intent
 def create_intent(intent,new_examples):
-    response=assistantV1.create_intent(
-        workspace_id=WORKSPACE_ID,
-        intent=intent,
-        examples= new_examples
-    ).get_result()
-    print(json.dumps(response, indent=2))
-
-#update the whole intent
-def update_intent(intent,updated_dict):
-    new_examples = updated_dict[intent]
-    response=assistantV1.update_intent(
-        workspace_id=WORKSPACE_ID,
-        intent=intent,
-        new_examples=new_examples
-    ).get_result()
-    print(json.dumps(response, indent=2))
+    try:
+        response=assistantV1.create_intent(
+            workspace_id=WORKSPACE_ID,
+            intent=intent,
+            examples= [{'text':new_examples}]
+        ).get_result()
+        print(json.dumps(response, indent=2))
+    except WatsonApiException as ex:
+        print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
 
 #*Initalize entities dict
-def list_entity(entities_index):
+def list_entity():
+    entities_index = []
     response=assistantV1.list_entities(
         workspace_id=WORKSPACE_ID
     ).get_result()
     for item in response['entities']:
-        #put intent name into dict
-        entities_index.update({item['entity']:{}})
+        entities_index.append(item)
     #return the dict   
     print('Initalize the entities_list') 
     return entities_index
-
-#get the selected entity
-def get_entity(entity,entities_dict):
-    response=assistantV1.get_entity(
-        workspace_id=WORKSPACE_ID,
-        entity=entity,
-        export=True
-    ).get_result()
-    print(json.dumps(response, indent=2))
-    entities_dict.update({entity:response['values']})
-    """
-    "values": [
-    {
-      "type": "synonyms",
-      "value": "water",
-      "synonyms": []
-    }]
-    """
-    print("Updating entity",entity)
-    return entities_dict
 
 #*create a new entity
 def create_entity(entity,values):
@@ -159,92 +92,100 @@ def add_entity_value(entity,value):
     ).get_result()
     print(json.dumps(response, indent=2))   
 
-#update the whole entity list
-def update_entity():
-    response=assistantV1.update_entity(
+#*create a new synonym for entity 
+def create_synonym(entity,value,synonym):
+    response=assistantV1.create_synonym(
         workspace_id=WORKSPACE_ID,
-        entity='beverage',
-        new_values=[
-            {'value': 'water'},
-            {'value': 'orange juice'},
-            {'value': 'soda'}
-        ]
+        entity=entity,
+        value=value,
+        synonym=synonym
     ).get_result()
+    print("Synonym created:")
     print(json.dumps(response, indent=2))
-
-#*create a new synonym for entity
-def create_synonym():
-    try:
-        response=assistantV1.create_synonym(
-            workspace_id=WORKSPACE_ID,
-            entity='beverage',
-            value='orange juice',
-            synonym='OJ'
-        ).get_result()
-        print("Synonym creating:")
-        print(json.dumps(response, indent=2))
-    except WatsonApiException as ex:
-        print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
 
 #*create a new dialog node
-def create_node():
+def create_node(condition,node_name,title,node_value):
     response=assistantV1.create_dialog_node(
         workspace_id=WORKSPACE_ID,
-        dialog_node='greeting',
-        conditions='#hello',
+        dialog_node=node_name,
+        conditions= '#'+condition,
         output={
-            'text': 'Hi! How can I help you?'
+            'text': node_value
         },
-        title='Greeting'
+        title=title
     ).get_result()
     print(json.dumps(response, indent=2))
 
-#*update the selected dialog node
-def update_node():
-    response=assistantV1.update_dialog_node(
-        workspace_id='{workspace_id}',
-        dialog_node='greeting',
-        new_output={
-            'text': 'Hello! What can I do for you?'
-        }
-    ).get_result()
-    print(json.dumps(response, indent=2))
+#Intent Controller
+def intent_controller(intent_name,text,intent_index):
+    #variable
+    print("intent_index:",intent_index)
+    if intent_name in intent_index:
+        print('if',intent_name,text)
+        add_intent_text(intent_name,text)
+    else:
+        print('else',intent_name,text)        
+        create_intent(intent_name,text)
+        intent_index.append(intent_name)
+    return intent_index
 
-#sample 2
-def update_intent_sample_2():
+#entity Controller
+def entity_controller(entity_name,value,entity_index):
     #variable
-    intent_name = 'General_About_You'
-    text = 'Easier Method!!!'
-    add_intent_text(intent_name,text)
-  
-#controller example for intent
-def update_intent_sample():
-    #variable
-    intent_name = 'General_About_You'
-    exist_intent_dict = {}
-    # initalize the list
-    exist_intent_dict = list_intent(exist_intent_dict)
-    # get the select intent from Watson
-    exist_intent_dict = get_intent(intent_name,exist_intent_dict)
-    # update the list of that intent
-    update_list = exist_intent_dict[intent_name]
-    update_list.append({'text':'Test About You!!!'})
-    exist_intent_dict.update({intent_name:update_list})
-    print('Updating the list')
-    #Update on Watson
-    update_intent(intent_name,exist_intent_dict)
-    exist_intent_dict.clear()
+    if entity_name in entity_index:
+        add_entity_value(entity_name,value)
+    else:
+        create_entity(entity_name,value)
+        entity_index.append(value)
+    return entity_index
     
+#import the example.csv and output as ???
+def import_csv(file_path):
+    with open(file_path, newline='') as csvfile:
+        csvreader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
+        fields = csvreader.fieldnames
+        payload = [row for row in csvreader]
+        print(type(payload))
+    return payload, fields
+
+#controller which function should be use
+def csv_controller():
+    payload, field_name = import_csv('example.csv')
+    exist_intent_index = list_intent()
+    exist_entity_index= list_entity
+    print(field_name)
+    for payload_dict in payload:
+        try:
+            print(payload_dict)    
+            types = payload_dict['type'].lower()
+            if types == 'intent':
+                print('Types:',types)
+                intent_name = payload_dict['intent_name']
+                print(intent_name)
+                intent_value = payload_dict['value']
+                print(intent_value)
+                exist_intent_index = intent_controller(intent_name,intent_value,exist_intent_index)
+            if types == 'entity':
+                entity_name = payload_dict['entity_name']
+                entity_value = payload_dict['value']
+                exist_entity_index = entity_controller(entity_name,entity_value,exist_entity_index)
+            if types == 'synonym':
+                entity_name = payload_dict['entity_name']
+                entity_value = payload_dict['entity_value']
+                synoym_value = payload_dict['value']
+                create_synonym(entity_name,entity_value,synoym_value)
+            if types == 'node':
+                condition = payload_dict['intent_name']
+                node_name = payload_dict['node_name']
+                title = payload_dict['node_title']
+                node_value= payload_dict['value']
+                create_node(condition,node_name,title,node_value)
+        except WatsonApiException as ex:
+            print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
 if __name__ == "__main__":
     try:
         create_connection()
-        update_intent_sample_2()
-        #create_entity()
-        #update_intent('hello',[{'text':'good evening'}] )
-        #update_entity()
-        #create_node()
-        #get_synonym()
-        #create_synonym()
-        #csv_controller()
+        csv_controller()
+        #exist_intent_index = list_intent([])
     except Exception as e:
         print(e)
