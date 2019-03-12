@@ -4,9 +4,10 @@ from watson_developer_cloud import AssistantV1,WatsonApiException
 from dotenv import load_dotenv
 import os
 global assistantV1
-
+global csv_file
+csv_file = 'example.csv'
 try:
-    load_dotenv('test.env')
+    load_dotenv('.env')
     ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
     ASSISTANT_URL = os.getenv("ASSISTANT_URL")
     ASSISTANT_VERSION = os.getenv("ASSISTANT_VERSION")
@@ -149,7 +150,7 @@ def import_csv(file_path):
 
 #controller which function should be use
 def csv_controller():
-    payload, field_name = import_csv('node.csv')
+    payload, field_name = import_csv(csv_file)
     exist_intent_index = list_intent()
     exist_entity_index= list_entity()
     print("Header: ",field_name)
@@ -180,9 +181,18 @@ def csv_controller():
                 create_node(condition,node_name,title,node_value)
         except WatsonApiException as ex:
             print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
+
+
 if __name__ == "__main__":
     try:
-        create_connection()
-        csv_controller()
+        while "the answer is invalid":
+            print("Please comfirm that {0} is the file you want to insert!".format(csv_file))
+            reply = str(input('Comfirm to insert data into Watson Assistant? (y/n): ')).lower().strip()
+            if reply[0] == 'y':
+                create_connection()
+                csv_controller()
+            if reply[0] == 'n':
+                print("This program is shutting down!")
+                break
     except Exception as e:
         print(e)
