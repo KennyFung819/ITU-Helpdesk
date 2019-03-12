@@ -108,7 +108,7 @@ def translate():
     else:
         return 'Translation service not available yet!'
         
-@app.route('/detect_language',method=['POST'])
+@app.route('/detect_language',methods=['POST'])
 def identify_language():
     helpdesk_translator = LanguageTranslatorV3(
         iam_apikey=LANGUAGE_TRANSLATOR_APIKEY,
