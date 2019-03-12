@@ -107,18 +107,22 @@ def translate():
             print("Method failed with status code " + str(ex.code) + ": " + ex.message)
     else:
         return 'Translation service not available yet!'
-
+        
+@app.route('/detect_language',method=['POST'])
+def identify_language():
+    helpdesk_translator = LanguageTranslatorV3(
+        iam_apikey=LANGUAGE_TRANSLATOR_APIKEY,
+        url=LANGUAGE_TRANSLATOR_URL,
+        version=LANGUAGE_TRANSLATOR_VERSION
+    )
+    language = helpdesk_translator.identify(
+    'Language translator translates text from one language to another').get_result()
+    print(json.dumps(language, indent=2))
 
 @app.route('/cantoneseTranslate', methods=['GET', 'POST'])
 def cantonese_translate():
     if request.method == 'POST':
         return "Doing"
-
-
-@app.route('/voiceToText', methods=['POST'])
-def voice_to_text():
-    return "Working in progress"
-
 
 @app.route('/input', methods=['GET', 'POST'])
 def user_input():
