@@ -14,27 +14,32 @@
     <script src="/static/js/chatbot.js"></script>
 </head>
 <body>
-<div class="conversation">
-    <div class="flow" id="flow_id">
+    <div class='container-fluid'>
+        <div class="conversation col-11 col-lg-8 col-xl-6">
+            <div class='row'>
+                <div class="flow col-12 col-lg-10" id="flow_id"></div>
+            </div>
+            <div class='row'>
+                <div class="input col-10 col-lg-10">
+                    <input type="text" class="textfield col-7 col-sm-8 col-lg-9" id="textfield_id" placeholder="Type a message" />
+                    <button class="msg_send_btn " type="button" id="sendbutton_id"><span class="fa fa-paper-plane-o"  aria-hidden="true"></i></button>
+                    <button class="msg_send_btn " type="button" id="voicebutton_id"><span class="fa fa-microphone"  aria-hidden="true"></i></button>
+                </div>
+            </div>
+        <!--
+                <select id="translate_selection">
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="Germany">Germany</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Russian">Russian</option>
+                    <option value="Chinese">Chinese</option>
+                </select>
+                <button class="buttons" id="translatebutton_id" alt="translate button"><i class="fas fa-language fa-2x"></i></button>
+        -->
+                <!--<input type="button" value="translate" class="buttons" id="translatebutton_id"> -->
+            </div>
+        </div>
     </div>
-    <div class="input">
-        <input type="text" class="textfield" placeholder="Type a message" />
-        <button class="msg_send_btn" type="button" id="sendbutton_id"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
-        <button class="msg_send_btn" type="button" id="voicebutton_id"><i class="fa fa-microphone" aria-hidden="true"></i></button>
-    </div>
-<!--
-        <select id="translate_selection">
-            <option value="English">English</option>
-            <option value="Spanish">Spanish</option>
-            <option value="Germany">Germany</option>
-            <option value="Japanese">Japanese</option>
-            <option value="Russian">Russian</option>
-            <option value="Chinese">Chinese</option>
-        </select>
-        <button class="buttons" id="translatebutton_id" alt="translate button"><i class="fas fa-language fa-2x"></i></button>
--->
-        <!--<input type="button" value="translate" class="buttons" id="translatebutton_id"> -->
-    </div>
-</div>
 </body>
 </html>
