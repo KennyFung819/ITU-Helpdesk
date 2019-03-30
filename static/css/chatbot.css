@@ -16,7 +16,8 @@
 }
 
 .option_button{
-    border:medium none
+    border:medium none;
+    margin: 1px 1px;
 }
 
 .textfield {

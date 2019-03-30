@@ -46,10 +46,10 @@ $(document).ready(function () {
         }
     });
 
-    function user_input($input_text,$type){
+    function user_input($input_text){
         $.ajax({
             url: '/input',
-            data: '{"'+$type +'":' + $input_text + '}',
+            data: '{"user_input":"' + $input_text + '"}',
             type: 'POST',
             contentType: 'application/json',
             dataType: 'json',
@@ -111,9 +111,8 @@ $(document).ready(function () {
 
     $("#flow_id").on("click",".option_button",function() {
         $user_input = this.value;
-        $type = "option";
-        console.log($user_input);
-        user_input($user_input,$type)
+        console.log(typeof($user_input))
+        user_input($user_input)
         $(this).parent().html("<span>" +$user_input+"</span>")
     });
 
@@ -129,11 +128,12 @@ $(document).ready(function () {
         else {
             $string = '<div class="student_dialogue" id="student_dialog_'+ $('.student_dialogue').length +'"><span>' + $input_text + '</span></div>';
             $('#flow_id').append($string);
-            if (typeof($input_text) == "string") {
-                $input_text = '"' + $input_text + '"'
-            }
+            $type = "user_input";
+            console.log(typeof($user_input))
+            console.log(typeof($type));
+            user_input($input_text)
+
         }
-        $type = "user_input";
-        user_input($input_text,$type)
+
     });
 });
