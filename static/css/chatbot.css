@@ -31,30 +31,47 @@
 }
 
 .msg_send_btn {
-  background: #05728f none repeat scroll 0 0;
-  border: medium none;
-  border-radius: 50%;
-  color: #fff;
-  cursor: pointer;
-  font-size: 17px;
-  height: 33px;
-  right: 10px;
-  top: 11px;
-  width: 33px;
+    background: #05728f none repeat scroll 0 0;
+    border: medium none;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    font-size: 17px;
+    height: 33px;
+    right: 10px;
+    top: 11px;
+    width: 33px;
 }
 
 
 .chatbot_dialogue {
     margin: 8px;
     text-align: left;
+    max-width: 600px;
 }
 
 .chatbot_dialogue span {
     display: inline-block;
-    background: #05497a;
+    background: #ebebeb;
     border-radius: 12px;
-    color: #fffbfb;
+    color: #646464;
     padding: 6px 12px;
+}
+
+.chatbot_dialogue span table, th, tr, td {
+    border: 1px solid black;
+}
+
+.chatbot_dialogue span img {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.chatbot_dialogue span img:hover {
+    opacity: 0.7;
 }
 
 .student_dialogue {
@@ -64,8 +81,9 @@
 
 .student_dialogue span {
     display: inline-block;
-    background: #00a13a;
+    background: #05728f;
     border-radius: 12px;
-    color: #fffbfb;
+    color: #fff;
     padding: 6px 12px;
+    max-width: 600px;
 }
