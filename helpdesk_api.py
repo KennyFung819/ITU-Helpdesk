@@ -108,7 +108,7 @@ def translate():
     else:
         return 'Translation service not available yet!'
         
-@app.route('/detect_language',method=['POST'])
+@app.route('/detect_language',methods=['POST'])
 def identify_language():
     helpdesk_translator = LanguageTranslatorV3(
         iam_apikey=LANGUAGE_TRANSLATOR_APIKEY,
@@ -134,8 +134,8 @@ def user_input():
                 print("Generating Session in /input")
             else:
                 session['session_id'] = session['session_id']
-                print('Session renew by user iput.')
-                print('ID:' + session['session_id'])
+                print('Session renew by user input.')
+            print("Prepare to POST")
             input_data = request.get_json()
             print(input_data)
             input_text = input_data['user_input']
