@@ -30,6 +30,11 @@
     min-height: 48px;
 }
 
+.translate_modal{
+    padding-top: 15%;
+    opacity: 100!important;
+}
+
 .msg_send_btn {
     background: #05728f none repeat scroll 0 0;
     border: medium none;

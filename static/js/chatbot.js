@@ -14,8 +14,9 @@ $(document).ready(function () {
             });
         }
     });
-    //Send POST request when onclick
-    $("#translatebutton_id").click(function () {
+
+
+    $("#select_translate").click(function() {
         $lang_selected = $("#translate_selection").val();
         switch ($lang_selected) {
             case "English":
@@ -51,8 +52,13 @@ $(document).ready(function () {
             url: '/input',
             data: '{"user_input":"' + $input_text + '"}',
             type: 'POST',
+            async: false,
+            timeout: 30000,
             contentType: 'application/json',
             dataType: 'json',
+            error: function(){
+                alert("Unexpected error Occur with Chatbot !");
+            },
             success: function (assistantResults) {
                 assistantResults.forEach(result => {
                     switch (result['response_type']) {
@@ -69,12 +75,18 @@ $(document).ready(function () {
                                     url: '/translate',
                                     data: '{"model_id":"' + $current_lang + '","text":"' + trim_string + '"}',
                                     type: 'POST',
+                                    async: false,
+                                    timeout: 30000,
                                     contentType: 'application/json',
                                     dataType: 'text',
+                                    error: function(){
+                                        alert("Unexpected error occur in translation!");
+                                    },
                                     success: function (translateResult) {
                                         $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + translateResult + '</span></div>';
                                         $('#flow_id').append($string);
                                     }
+                                
                                 });
                             }
                             break;
@@ -98,8 +110,7 @@ $(document).ready(function () {
                             break;
                     }
                     var $flow_id = $("#flow_id");
-                    console.log("height:" + $flow_id.height());
-                    $("#flow_id").scrollTop($flow_id.height())
+                    $("#flow_id").scrollTop(9999)
                 });
             },
             error: function () {
@@ -116,6 +127,7 @@ $(document).ready(function () {
         $(this).parent().html("<span>" +$user_input+"</span>")
     });
 
+    //Send POST request when onclick
     $("#sendbutton_id").click(function () {
         var $string = "";
         var $input_text = $("#textfield_id").val();
@@ -136,4 +148,5 @@ $(document).ready(function () {
         }
 
     });
+
 });

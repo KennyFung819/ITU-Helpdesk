@@ -6,13 +6,17 @@
     <!-- Set to ideal viewport -->
     <title>OUHK Chatbot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    <!--
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/solid.css"
           integrity="sha384-r/k8YTFqmlOaqRkZuSiE9trsrDXkh07mRaoGBMoDcmA58OHILZPsk29i2BsFng1B" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/fontawesome.css"
           integrity="sha384-4aon80D8rXCGx9ayDt85LbyUHeMWd3UiBaWliBlJ53yzm9hqN21A+o1pqoyK04h+" crossorigin="anonymous">
+    -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <script src="/static/js/chatbot.js"></script>
 </head>
 <body>
@@ -27,19 +31,41 @@
                        placeholder="Type a message"/>
                 <button class="msg_send_btn " type="button" id="sendbutton_id"><i class="fa fa-paper-plane-o" aria-hidden="true"></i></button>
                 <button class="msg_send_btn " type="button" id="voicebutton_id"><i class="fa fa-microphone" aria-hidden="true"></i></button>
-                <button class="msg_send_btn " type="button" id="voicebutton_id"><i class="fa fa-language" aria-hidden="true"></i></button>
+                <button class="msg_send_btn " type="button" id="translatebutton_id" data-toggle="modal" data-target="#SelectTranslate"><i class="fa fa-language" aria-hidden="true"></i></button>
+                <!-- Modal -->
+                <div class="modal fade translate_modal" id="SelectTranslate" role="dialog">
+                    <div class="modal-dialog">  
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        
+                        <h4 class="modal-title">Language Selection</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="translate_selection ">Select the Language you want to translate:</label>
+                                <select class="form-control col-6" id="translate_selection">
+                                        <option value="English">English</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="Germany">Germany</option>
+                                        <option value="Japanese">Japanese</option>
+                                        <option value="Russian">Russian</option>
+                                        <option value="Chinese">Chinese</option>
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" id="select_translate">Translate</button>
+                        </div>
+                    </div>
+                    
+                    </div>
+                </div>
             </div>
         </div>
         <!--
-                <select id="translate_selection">
-                    <option value="English">English</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="Germany">Germany</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="Russian">Russian</option>
-                    <option value="Chinese">Chinese</option>
-                </select>
-                <button class="buttons" id="translatebutton_id" alt="translate button"><i class="fas fa-language fa-2x"></i></button>
+
         -->
         <!--<input type="button" value="translate" class="buttons" id="translatebutton_id"> -->
     </div>
