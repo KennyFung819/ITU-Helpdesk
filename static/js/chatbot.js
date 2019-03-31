@@ -9,7 +9,7 @@ $(document).ready(function () {
         dataType: 'json',
         success: function (results) {
             results.forEach(result => {
-                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + result['text'] + '</span></div>';
+                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_' + $('.chatbot_dialogue').length + '"><span>' + result['text'] + '</span></div>';
                 $('#flow_id').append($string);
             });
         }
@@ -40,7 +40,7 @@ $(document).ready(function () {
 
     $('#textfield_id').keypress(function (event) {
         var keycode = (event.keyCode ? event.keyCode : event.which);
-        if (keycode ==13){
+        if (keycode == 13) {
             $('#sendbutton_id').click();
         }
     });
@@ -56,7 +56,7 @@ $(document).ready(function () {
             return;
         }
         else {
-            $string = '<div class="student_dialogue" id="student_dialog_'+ $('.student_dialogue').length +'"><span>' + $input_text + '</span></div>';
+            $string = '<div class="student_dialogue" id="student_dialog_' + $('.student_dialogue').length + '"><span>' + $input_text + '</span></div>';
             $('#flow_id').append($string);
             if (typeof($input_text) == "string") {
                 $input_text = '"' + $input_text + '"'
@@ -73,7 +73,7 @@ $(document).ready(function () {
                     switch (result['response_type']) {
                         case "text":
                             if ($current_lang == 'en') {
-                                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + result['text'] + '</span></div>';
+                                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_' + $('.chatbot_dialogue').length + '"><span>' + result['text'] + '</span></div>';
                                 $('#flow_id').append($string);
                             }
                             else {
@@ -87,18 +87,18 @@ $(document).ready(function () {
                                     contentType: 'application/json',
                                     dataType: 'text',
                                     success: function (translateResult) {
-                                        $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + translateResult + '</span></div>';
+                                        $string = '<div class="chatbot_dialogue" id="chatbot_dialog_' + $('.chatbot_dialogue').length + '"><span>' + translateResult + '</span></div>';
                                         $('#flow_id').append($string);
                                     }
                                 });
                             }
                             break;
                         case "image":
-                            $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+ $('.chatbot_dialogue').length +'"><span><img src="' + result['source'] + '"></span></div>';
+                            $string = '<div class="chatbot_dialogue" id="chatbot_dialog_' + $('.chatbot_dialogue').length + '"><span><img src="' + result['source'] + '"></span></div>';
                             $('#flow_id').append($string);
                             break;
                         default:
-                            $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+ $('.chatbot_dialogue').length +'"><span>Hello </span></div>';
+                            $string = '<div class="chatbot_dialogue" id="chatbot_dialog_' + $('.chatbot_dialogue').length + '"><span>Hello </span></div>';
                             $('#flow_id').append($string);
                             break;
                     }
