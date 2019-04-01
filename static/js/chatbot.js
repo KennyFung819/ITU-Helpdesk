@@ -9,7 +9,7 @@ $(document).ready(function () {
         dataType: 'json',
         success: function (results) {
             results.forEach(result => {
-                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + result['text'] + '</span></div>';
+                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + decodeURIComponent(result['text']) + '</span></div>';
                 $('#flow_id').append($string);
             });
         }
@@ -50,7 +50,7 @@ $(document).ready(function () {
     function user_input($input_text){
         $.ajax({
             url: '/input',
-            data: '{"user_input":"' + $input_text + '"}',
+            data: '{"user_input":"' + encodeURIComponent($input_text) + '"}',
             type: 'POST',
             async: false,
             timeout: 30000,
@@ -64,7 +64,7 @@ $(document).ready(function () {
                     switch (result['response_type']) {
                         case "text":
                             if ($current_lang == 'en') {
-                                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + result['text'] + '</span></div>';
+                                $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + decodeURIComponent(result['text']) + '</span></div>';
                                 $('#flow_id').append($string);
                             }
                             else {
@@ -73,7 +73,7 @@ $(document).ready(function () {
                                 console.log(trim_string);
                                 $.ajax({
                                     url: '/translate',
-                                    data: '{"model_id":"' + $current_lang + '","text":"' + trim_string + '"}',
+                                    data: '{"model_id":"' +  encodeURIComponent($current_lang) + '","text":"' +  encodeURIComponent(trim_string) + '"}',
                                     type: 'POST',
                                     async: false,
                                     timeout: 30000,
@@ -83,7 +83,7 @@ $(document).ready(function () {
                                         alert("Unexpected error occur in translation!");
                                     },
                                     success: function (translateResult) {
-                                        $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + translateResult + '</span></div>';
+                                        $string = '<div class="chatbot_dialogue" id="chatbot_dialog_'+  $('.chatbot_dialogue').length +'"><span>' + decodeURIComponent(translateResult) + '</span></div>';
                                         $('#flow_id').append($string);
                                     }
                                 

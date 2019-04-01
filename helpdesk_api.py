@@ -9,7 +9,8 @@ from flask import Flask, request, make_response, render_template, redirect, json
 from dotenv import load_dotenv
 from datetime import timedelta
 from watson_developer_cloud import WatsonApiException, AssistantV2, LanguageTranslatorV3
-import os
+from urllib.parse import quote,unquote
+import os,urllib
 
 global watsonAssistant
 # Init variable
@@ -85,8 +86,8 @@ def translate():
         try:
             before_translate_text = request.get_json()
             print(before_translate_text)
-            target = before_translate_text['text']
-            model_id = before_translate_text['model_id']
+            target =  unquote(before_translate_text['text']) 
+            model_id = unquote(before_translate_text['model_id'])
             print(target)
             print(model_id)
             helpdesk_translator = LanguageTranslatorV3(
@@ -102,7 +103,7 @@ def translate():
             translate_lists = translation["translations"][0]
             output_text = translate_lists["translation"]
             print(output_text)
-            return output_text
+            return quote(output_text)
         except WatsonApiException as ex:
             print("Method failed with status code " + str(ex.code) + ": " + ex.message)
     else:
@@ -138,8 +139,9 @@ def user_input():
             print("Prepare to POST")
             input_data = request.get_json()
             print(input_data)
-            input_text = input_data['user_input']
+            input_text = unquote(input_data['user_input'])
             print(input_text)
+            print(type(input_text))
             # Initalize welcome
             if input_text == 'initalize-welcome':
                 if not ('Greeting' in session):
