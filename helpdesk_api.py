@@ -5,17 +5,21 @@ Created on Wed Feb  6 12:38:11 2019
 @author: Kenny
 """
 # Import all the lib
-from flask import Flask, request, make_response, render_template, redirect, json, session
+from flask import Flask, request,url_for,flash, make_response, render_template, redirect, json, session
 from dotenv import load_dotenv
 from datetime import timedelta
 from watson_developer_cloud import WatsonApiException, AssistantV2, LanguageTranslatorV3
 from urllib.parse import quote,unquote
 import os,urllib
+from werkzeug.utils import secure_filename
 
 global watsonAssistant
 # Init variable
 app = Flask(__name__)
 app.secret_key = 'ITU-helpdesk'
+UPLOAD_FOLDER = 'csv_folder/'
+ALLOWED_EXTENSIONS = set(['csv'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # This should set the session timeout limited to 5 mins, which is same with IBM assistant
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 
@@ -52,6 +56,29 @@ def create_connection():
 def home():
     resp = redirect('/index')
     return resp
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/admin',methods=['GET','POST'] )
+def upload_csv():
+    if request.method == 'GET':
+        flash("Plase Upload a file")
+        resp = make_response(render_template("upload_csv.html"))
+        return resp
+    if request.method == 'POST':
+        file = request.files['fileupload']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            pathname= os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(pathname)
+            file.save(pathname)
+            import csvtowatson as csvtowatson
+            csvtowatson.run(pathname)
+            flash("Inserted into Watson")
+
+            return redirect('/admin')
 
 
 @app.route('/index', methods=['GET'])
