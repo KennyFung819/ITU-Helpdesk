@@ -5,19 +5,22 @@ from dotenv import load_dotenv
 import os
 global assistantV1
 global csv_file
-csv_file = 'example.csv'
-try:
-    load_dotenv('.env')
-    ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
-    ASSISTANT_URL = os.getenv("ASSISTANT_URL")
-    ASSISTANT_VERSION = os.getenv("ASSISTANT_VERSION")
-    WORKSPACE_ID = os.getenv("WORKSPACE_ID")
-    print(ASSISTANT_APIKEY)
-except RuntimeError as e:
-    print("File '.env' doesn't exist")
+
+def init():
+    csv_file = 'example.csv'
+    try:
+        load_dotenv('.env')
+        ASSISTANT_APIKEY = os.getenv("ASSISTANT_APIKEY")
+        ASSISTANT_URL = os.getenv("ASSISTANT_URL")
+        ASSISTANT_VERSION = os.getenv("ASSISTANT_VERSION")
+        WORKSPACE_ID = os.getenv("WORKSPACE_ID")
+        print(ASSISTANT_APIKEY,ASSISTANT_URL,ASSISTANT_VERSION,WORKSPACE_ID)       
+        return ASSISTANT_APIKEY,ASSISTANT_URL,ASSISTANT_VERSION,WORKSPACE_ID
+    except RuntimeError as e:
+        print("File '.env' doesn't exist")
 
 #**create connection to watson server
-def create_connection():
+def create_connection(ASSISTANT_APIKEY,ASSISTANT_URL):
     global assistantV1
     assistantV1=AssistantV1(
         iam_apikey=ASSISTANT_APIKEY,
@@ -27,7 +30,7 @@ def create_connection():
     print("Connected")
 
 #*list all the existing intent
-def list_intent():
+def list_intent(WORKSPACE_ID):
     intent_index = []
     response=assistantV1.list_intents(
         workspace_id=WORKSPACE_ID
@@ -39,7 +42,7 @@ def list_intent():
     return intent_index
 
 #*add text to intent
-def add_intent_text(intent,text):
+def add_intent_text(WORKSPACE_ID,intent,text):
     print("Add the text:", text , "to intent:" , intent)    
     response=assistantV1.create_example(
         workspace_id=WORKSPACE_ID,
@@ -49,7 +52,7 @@ def add_intent_text(intent,text):
     print(json.dumps(response, indent=2))
 
 #*create a new intent
-def create_intent(intent,new_examples):
+def create_intent(WORKSPACE_ID,intent,new_examples):
     try:
         response=assistantV1.create_intent(
             workspace_id=WORKSPACE_ID,
@@ -61,7 +64,7 @@ def create_intent(intent,new_examples):
         print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
 
 #*Initalize entities dict
-def list_entity():
+def list_entity(WORKSPACE_ID):
     entities_index = []
     response=assistantV1.list_entities(
         workspace_id=WORKSPACE_ID
@@ -73,7 +76,7 @@ def list_entity():
     return entities_index
 
 #*create a new entity
-def create_entity(entity,values):
+def create_entity(WORKSPACE_ID,entity,values):
     response=assistantV1.create_entity(
         workspace_id=WORKSPACE_ID,
         entity=entity,
@@ -82,7 +85,7 @@ def create_entity(entity,values):
     print(json.dumps(response, indent=2))
 
 #*add value to entity
-def add_entity_value(entity,value):
+def add_entity_value(WORKSPACE_ID,entity,value):
     print("Adding value:{0} into entity: {1}".format(value,entity))
     response=assistantV1.create_value(
         workspace_id=WORKSPACE_ID,
@@ -92,7 +95,7 @@ def add_entity_value(entity,value):
     print(json.dumps(response, indent=2))   
 
 #*create a new synonym for entity 
-def create_synonym(entity,value,synonym):
+def create_synonym(WORKSPACE_ID,entity,value,synonym):
     response=assistantV1.create_synonym(
         workspace_id=WORKSPACE_ID,
         entity=entity,
@@ -103,7 +106,7 @@ def create_synonym(entity,value,synonym):
     print(json.dumps(response, indent=2))
 
 #*create a new dialog node
-def create_node(condition,node_name,title,node_value):
+def create_node(WORKSPACE_ID,condition,node_name,title,node_value):
     response=assistantV1.create_dialog_node(
         workspace_id=WORKSPACE_ID,
         dialog_node=node_name,
@@ -116,27 +119,27 @@ def create_node(condition,node_name,title,node_value):
     print("Respone",json.dumps(response, indent=2))
 
 #Intent Controller
-def intent_controller(intent_name,text,intent_index):
+def intent_controller(WORKSPACE_ID,intent_name,text,intent_index):
     #variable
     if intent_name in intent_index:
         print('Existing Intent:{0} ,insert Text: "{1}"'.format(intent_name,text))
-        add_intent_text(intent_name,text)
+        add_intent_text(WORKSPACE_ID,intent_name,text)
     else:
         print('New Intent:{0} ,with Text: "{1}"'.format(intent_name,text))
-        create_intent(intent_name,text)
-        intent_index.append(intent_name)
+        create_intent(WORKSPACE_ID,intent_name,text)
+        intent_index.append(WORKSPACE_ID,intent_name)
     return intent_index
 
 #entity Controller
-def entity_controller(entity_name,value,entity_index):
+def entity_controller(WORKSPACE_ID,entity_name,value,entity_index):
     #variable
     if entity_name in entity_index:
         print('Existing Entity:{0} ,insert value: "{1}"'.format(entity_index,value))
-        add_entity_value(entity_name,value)
+        add_entity_value(WORKSPACE_ID,entity_name,value)
     else:
         print('New Entity:{0} ,with value: "{1}"'.format(entity_index,value))        
-        create_entity(entity_name,value)
-        entity_index.append(entity_name)
+        create_entity(WORKSPACE_ID,entity_name,value)
+        entity_index.append(WORKSPACE_ID,entity_name)
     return entity_index
     
 #import the example.csv and output as ???
@@ -149,10 +152,10 @@ def import_csv(file_path):
     return payload, fields
 
 #controller which function should be use
-def csv_controller():
-    payload, field_name = import_csv(csv_file)
-    exist_intent_index = list_intent()
-    exist_entity_index= list_entity()
+def csv_controller(file_path,WORKSPACE_ID):
+    payload, field_name = import_csv(file_path)
+    exist_intent_index = list_intent(WORKSPACE_ID)
+    exist_entity_index= list_entity(WORKSPACE_ID)
     print("Header: ",field_name)
     for payload_dict in payload:
         try:
@@ -161,16 +164,16 @@ def csv_controller():
             if types == 'intent':
                 intent_name = payload_dict['intent_name']
                 intent_value = payload_dict['value']
-                exist_intent_index = intent_controller(intent_name,intent_value,exist_intent_index)
+                exist_intent_index = intent_controller(WORKSPACE_ID,intent_name,intent_value,exist_intent_index)
             if types == 'entity':
                 entity_name = payload_dict['entity_name']
                 entity_value = payload_dict['value']
-                exist_entity_index = entity_controller(entity_name,entity_value,exist_entity_index)
+                exist_entity_index = entity_controller(WORKSPACE_ID,entity_name,entity_value,exist_entity_index)
             if types == 'synonym':
                 entity_name = payload_dict['entity_name']
                 entity_value = payload_dict['entity_value']
                 synoym_value = payload_dict['value']
-                create_synonym(entity_name,entity_value,synoym_value)
+                create_synonym(WORKSPACE_ID,entity_name,entity_value,synoym_value)
             if types == 'node':
                 print("Node function")
                 condition = payload_dict['intent_name']
@@ -178,10 +181,14 @@ def csv_controller():
                 title = payload_dict['node_title']
                 node_value= payload_dict['value']
                 print("Condition: {0}; Entity: {1}; synonym: {2}; Value: {3}".format(condition,node_name,title,node_value))
-                create_node(condition,node_name,title,node_value)
+                create_node(WORKSPACE_ID,condition,node_name,title,node_value)
         except WatsonApiException as ex:
             print ("Method failed with status code " + str(ex.code) + ": " + ex.message)
 
+def run(file_path):
+    ASSISTANT_APIKEY,ASSISTANT_URL,ASSISTANT_VERSION,WORKSPACE_ID = init()
+    create_connection(ASSISTANT_APIKEY,ASSISTANT_URL)
+    csv_controller(file_path,WORKSPACE_ID)
 
 if __name__ == "__main__":
     try:
@@ -189,8 +196,9 @@ if __name__ == "__main__":
             print("Please comfirm that {0} is the file you want to insert!".format(csv_file))
             reply = str(input('Comfirm to insert data into Watson Assistant? (y/n): ')).lower().strip()
             if reply[0] == 'y':
-                create_connection()
-                csv_controller()
+                ASSISTANT_APIKEY,ASSISTANT_URL,ASSISTANT_VERSION,WORKSPACE_ID = init()
+                create_connection(ASSISTANT_APIKEY,ASSISTANT_URL)
+                csv_controller('example.csv',WORKSPACE_ID)
             if reply[0] == 'n':
                 print("This program is shutting down!")
                 break
